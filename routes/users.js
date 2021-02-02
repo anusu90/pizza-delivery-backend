@@ -65,6 +65,7 @@ router.post("/login", async (req, res) => {
   }
 })
 
+/////////REGISTER BACKEND/////////////
 
 router.post("/register", async (req, res) => {
 
@@ -111,6 +112,31 @@ router.post("/register", async (req, res) => {
     })
 
   }
+
+})
+
+/////////LOGOUT BACKEND/////////////
+router.get("/logout", async (req, res) => {
+
+  try {
+
+    console.log(req.headers)
+    res.setHeader('Set-Cookie', cookie.serialize('myAgainJwt2', "invalid-cookie", {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 7, // 1 week,
+      sameSite: "none",
+      secure: true
+    }));
+    res.status(200).json({ message: "Logout Successful" })
+
+  } catch (error) {
+
+    res.status(500).json({ message: error })
+
+  }
+
+
+
 
 })
 
