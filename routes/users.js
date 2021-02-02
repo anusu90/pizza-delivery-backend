@@ -119,7 +119,6 @@ router.post("/register", async (req, res) => {
 router.get("/logout", async (req, res) => {
 
   try {
-
     console.log(req.headers)
     res.setHeader('Set-Cookie', cookie.serialize('myAgainJwt2', "invalid-cookie", {
       httpOnly: true,
@@ -136,8 +135,45 @@ router.get("/logout", async (req, res) => {
   }
 
 
+})
+
+const myAuth = (req, res, next) => {
+
+  if (req.headers.cookie) {
+
+    try {
+      let jwtToBeVerfied = req.headers.cookie.split('=')[1];
+      let verifiedUser = jwt.verify(jwtToBeVerfied, process.env.RANDOM_KEY_FOR_JWT)
+      req.body.userID = verifiedUser.user._id;
+      console.log(verifiedUser.user._id);
+      next();
+
+    } catch (error) {
+      res.status(404).json({ message: "Unauthorized Access" })
+    }
+
+  }
+
+}
+
+router.get("/check", myAuth, async (req, res) => {
+
+  userID = req.body.userID;
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  await client.connect();
+  let userDBCollection = client.db('pizza-shop').collection("users");
+  let user = await userDBCollection.findOne({
+    _id: mongodb.ObjectID(userID)
+  });
+
+  console.log(user);
+  res.status(200).json(user)
+
 
 
 })
+
+
+
 
 module.exports = router; 
