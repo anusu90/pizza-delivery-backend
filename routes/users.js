@@ -18,7 +18,7 @@ router.get('/', function (req, res, next) {
 
 /////////LOGIN BACKEND/////////////
 
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     await client.connect();
