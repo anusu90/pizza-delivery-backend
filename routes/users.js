@@ -72,7 +72,6 @@ router.post("/register", async (req, res) => {
   try {
 
     console.log(req.body);
-
     const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     await client.connect();
     let userDBCollection = client.db('pizza-shop').collection("users");
@@ -173,6 +172,94 @@ router.get("/check", myAuth, async (req, res) => {
 
 })
 
+
+//////FORGOT PASS/////////
+router.post("/emailverify", async (req, res) => {
+  try {
+    const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    await client.connect();
+    let userDBCollection = client.db('pizza-shop').collection("users");
+
+    let user = await userDBCollection.findOne({
+      email: req.body.email
+    });
+
+    if (user) {
+      let randKey = require('crypto').randomBytes(8).toString('hex');
+      problemSigningIn(user, randKey);
+
+      await userDBCollection.updateOne({
+        email: req.body.email
+      }, { $set: { randKey: randKey } });
+
+      res.status(200).json({
+        "message": "Email sent"
+      })
+
+    } else {
+      res.status(404).json({
+        "message": "No Email Found"
+      })
+
+    }
+
+  } catch (error) {
+
+    res.status(500).json({
+      "message": error
+    })
+
+  }
+
+})
+
+
+router.post("/changepass", async (req, res) => {
+
+  try {
+    const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    await client.connect();
+    let userDBCollection = client.db('pizza-shop').collection("users");
+
+    let user = await userDBCollection.findOne({
+      email: req.body.email
+    });
+
+    if (user) {
+
+      console.log(user)
+
+      if (req.body.randKey == user.randKey) {
+        let salt = await bcrypt.genSalt(10)
+        let hashedPass = await bcrypt.hash(req.body.password, salt);
+        await userDBCollection.updateOne({
+          email: req.body.email
+        }, { $set: { password: hashedPass } });
+
+        res.status(200).json({
+          "message": "Pass changed"
+        })
+
+      } else {
+        res.status(404).json({ message: "Incorrect Random Key" })
+      }
+
+    } else {
+      res.status(404).json({
+        "message": "No Email Found"
+      })
+
+    }
+
+  } catch (error) {
+
+    res.status(500).json({
+      "message": error
+    })
+
+  }
+
+})
 
 
 
