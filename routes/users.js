@@ -42,6 +42,7 @@ router.post("/login", async (req, res) => {
           sameSite: "none",
           secure: true
         }));
+        res.status(200).json(user);
       } else {
         res.status(401).json({
           "message": "Invalid password"
