@@ -228,6 +228,7 @@ router.post("/changepass", async (req, res) => {
     if (user) {
 
       console.log(user)
+      console.log(req.body.randKey)
 
       if (req.body.randKey == user.randKey) {
         let salt = await bcrypt.genSalt(10)
